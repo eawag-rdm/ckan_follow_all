@@ -1,0 +1,38 @@
+#!/home/vonwalha/Ckan/ckan/lib/default/bin/python
+
+"""ckan_follow_all
+
+Usage:
+  follow_all_groups [-u] <host>
+  follow_all_groups -h
+
+Options:
+  -u   Unfollow all organizations instead of follow
+
+Arguments:
+  <host>: CKAN base URL
+
+""" 
+
+import ckanapi
+import os
+import sys
+from pprint import PrettyPrinter as pp
+from docopt import docopt
+
+def main(host, unfollow):
+    action = 'unfollow_group' if unfollow else 'follow_group' 
+    ckan = ckanapi.RemoteCKAN(host, apikey=os.environ.get('CKAN_APIKEY'))
+    all_orgas = ckan.call_action('organization_list')
+    for o in all_orgas:
+        try:
+            res = ckan.call_action(action, {'id': o})
+        except Exception as e:
+            print(e)
+        else:
+            print('{} {}'.format(action, o)) 
+
+
+if __name__ == '__main__':
+    args = docopt(__doc__)
+    main(args.get('<host>'), args['-u'])
